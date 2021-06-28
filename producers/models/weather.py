@@ -32,7 +32,7 @@ class Weather(Producer):
     def __init__(self, month):
         
         super().__init__(
-            f"com.udacity.weather.{month}", # TODO: Come up with a better topic name
+            f"com.udacity.weather.{month}",
             key_schema=Weather.key_schema,
             value_schema=Weather.value_schema,
         )

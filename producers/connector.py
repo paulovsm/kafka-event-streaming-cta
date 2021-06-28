@@ -38,7 +38,7 @@ def configure_connector():
                "table.whitelist": "stations",
                "mode": "incrementing",
                "incrementing.column.name": "stop_id",
-               "topic.prefix": "postgres_conn_",
+               "topic.prefix": "com.udacity.",
                "poll.interval.ms": "30000",
            }
        }),
@@ -50,7 +50,7 @@ def configure_connector():
     except:
         print(f"Error creating kafka connector: {json.dumps(resp.json(), indent=2)}")
         return
-        
+
     logging.debug("connector created successfully")
 
 

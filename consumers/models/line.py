@@ -57,7 +57,7 @@ class Line:
     def process_message(self, message):
         """Given a kafka message, extract data"""
         print(message.topic())
-        if message.topic() == "faust.stations.transformed": # Set the conditional correctly to the stations Faust Table
+        if message.topic() == "com.udacity.stations.faust": # Set the conditional correctly to the stations Faust Table
             logger.debug("received station topic")
             try:
                 value = json.loads(message.value())

@@ -33,9 +33,9 @@ class TransformedStation(faust.Record):
 #   places it into a new topic with only the necessary information.
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
 kafka_topic = app.topic("com.udacity.stations", value_type=Station)
-out_topic = app.topic("faust.stations.table", partitions=1)
+out_topic = app.topic("com.udacity.stations.faust", partitions=1)
 table = app.Table(
-    "faust.stations.transformed",
+    "com.udacity.stations.table",
     default=TransformedStation,
     partitions=1,
     changelog_topic=out_topic,
@@ -61,6 +61,8 @@ async def process_stations(stations):
             order=station.order,
             line=line
         )
+
+        logger.debug(f"faust processing {station}")
 
 
 if __name__ == "__main__":

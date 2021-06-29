@@ -71,12 +71,13 @@ class KafkaConsumer:
         try:
             message = self.consumer.poll(self.consume_timeout)
             if message is None:
-                logger.WARN("No message received by consumer")
+                logger.warn("No message received by consumer")
                 return 0
             elif message.error() is not None:
-                logger.ERROR(f"Error from consumer {message.error()}")
+                logger.error(f"Error from consumer {message.error()}")
                 return 0
             else:
+                logger.debug(f"Message Received: {message}")
                 self.message_handler(message)
                 return 1
         except SerializerError as error:

@@ -6,7 +6,8 @@ from pathlib import Path
 import tornado.ioloop
 import tornado.template
 import tornado.web
-
+import tornado.options
+from tornado.log import enable_pretty_logging
 
 # Import logging before models to ensure configuration is picked up
 logging.config.fileConfig(f"{Path(__file__).parents[0]}/logging.ini")
@@ -46,7 +47,7 @@ def run_server():
             "Ensure that the KSQL Command has run successfully before running the web server!"
         )
         exit(1)
-    if topic_check.topic_exists("org.chicago.cta.stations.table.v1") is False:
+    if topic_check.topic_exists("com.udacity.stations.faust") is False:
         logger.fatal(
             "Ensure that Faust Streaming is running successfully before running the web server!"
         )
@@ -55,26 +56,31 @@ def run_server():
     weather_model = Weather()
     lines = Lines()
 
+    tornado.options.parse_command_line()
+
+    tornado.log.enable_pretty_logging()
+
     application = tornado.web.Application(
         [(r"/", MainHandler, {"weather": weather_model, "lines": lines})]
+        , debug=True
     )
     application.listen(8888)
 
     # Build kafka consumers
     consumers = [
         KafkaConsumer(
-            "org.chicago.cta.weather.v1",
+            "com.udacity.weather",
             weather_model.process_message,
             offset_earliest=True,
         ),
         KafkaConsumer(
-            "org.chicago.cta.stations.table.v1",
+            "com.udacity.stations.faust",
             lines.process_message,
             offset_earliest=True,
             is_avro=False,
         ),
         KafkaConsumer(
-            "^org.chicago.cta.station.arrivals.",
+            "^com.udacity.stations.arrivals.",
             lines.process_message,
             offset_earliest=True,
         ),

@@ -66,15 +66,13 @@ class Producer:
 
         client.create_topics([topic])
 
-        logger.info("topic creation kafka complete")
-
     def time_millis(self):
         return int(round(time.time() * 1000))
 
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""
         self.producer.flush()
-        
+
         logger.info("producer closed")
 
     def time_millis(self):

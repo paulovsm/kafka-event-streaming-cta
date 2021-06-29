@@ -15,6 +15,7 @@ class Weather:
 
     def process_message(self, message):
         """Handles incoming weather data"""
+        
         logger.debug(f"weather event: {message.value()}")
         weather_json = json.loads(message.value())
         try:

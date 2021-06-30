@@ -9,6 +9,8 @@ from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 logger = logging.getLogger(__name__)
 
+SCHEMA_REGISTRY_URL = "http://localhost:8081"
+BROKER_URL = "PLAINTEXT://localhost:9092"
 
 class Producer:
     """Defines and provides common functionality amongst Producers"""
@@ -38,9 +40,8 @@ class Producer:
         #
         #
         self.broker_properties = {
-            "BROKER_URL": "PLAINTEXT://localhost:9092",
-            "SCHEMA_REGISTRY_URL": "http://localhost:8081",
-            "group.id": f"{self.topic_name}"
+            "bootstrap.servers": BROKER_URL,
+            "schema.registry.url": SCHEMA_REGISTRY_URL
         }
 
         # If the topic does not already exist, try to create it
@@ -49,25 +50,17 @@ class Producer:
             Producer.existing_topics.add(self.topic_name)
 
         # Configure the AvroProducer
-        self.producer = AvroProducer(
-            {"bootstrap.servers": self.broker_properties["BROKER_URL"]}, 
-            schema_registry=CachedSchemaRegistryClient(
-                {"url": self.broker_properties["SCHEMA_REGISTRY_URL"]},
-            )
-        )
+        self.producer = AvroProducer(self.broker_properties, default_key_schema=self.key_schema, default_value_schema=self.value_schema)
 
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""
-        client = AdminClient({"bootstrap.servers": self.broker_properties["BROKER_URL"]})
+        client = AdminClient({"bootstrap.servers": BROKER_URL})
         topic = NewTopic(self.topic_name, 
             num_partitions=self.num_partitions, 
             replication_factor=self.num_replicas,
         )
 
         client.create_topics([topic])
-
-    def time_millis(self):
-        return int(round(time.time() * 1000))
 
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""

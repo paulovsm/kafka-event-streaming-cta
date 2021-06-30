@@ -13,21 +13,19 @@ logger = logging.getLogger(__name__)
 KSQL_URL = "http://localhost:8088"
 
 KSQL_STATEMENT = """
-CREATE TABLE turnstile (
-    station_id INT,
+CREATE TABLE TURNSTILE (
+    station_id INTEGER,
     station_name VARCHAR,
-    line VARCHAR 
+    line VARCHAR
 ) WITH (
-    KAFKA_TOPIC='com.udacity.raw.turnstile',
-    VALUE_FORMAT='avro',
+    KAFKA_TOPIC='org.chicago.cta.turnstile',
+    VALUE_FORMAT='AVRO',
     KEY='station_id'
 );
 
-CREATE TABLE turnstile_summary
-WITH (VALUE_FORMAT='json') AS
-    SELECT station_id, COUNT(station_id) AS turnstile_count
-    FROM turnstile
-    GROUP BY station_id;
+CREATE TABLE TURNSTILE_SUMMARY
+WITH (VALUE_FORMAT='JSON') AS
+    SELECT station_id, COUNT(*) as count FROM TURNSTILE GROUP BY station_id;
 """
 
 def execute_statement():

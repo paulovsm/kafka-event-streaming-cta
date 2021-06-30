@@ -34,7 +34,7 @@ class Station(Producer):
         # replicas
         #
         #
-        topic_name = f"com.udacity.stations.arrivals.{station_name}"
+        topic_name = f"org.chicago.cta.station.{station_name}.arrivals"
         super().__init__(
             topic_name,
             key_schema=Station.key_schema,
@@ -54,22 +54,23 @@ class Station(Producer):
 
     def run(self, train, direction, prev_station_id, prev_direction):
         """Simulates train arrivals at this station"""
-        
-        self.producer.produce(
-            topic=self.topic_name,
-            key_schema=self.key_schema,
-            key={"timestamp": self.time_millis()},
-            value_schema=self.value_schema,
-            value={
-                "station_id": self.station_id,
-                "train_id": train.train_id,
-                "direction": direction,
-                "line": self.color.name,
-                "train_status": train.status.name,
-                "prev_station_id": prev_station_id,
-                "prev_direction": prev_direction
-            },
-        )
+        try:
+            self.producer.produce(
+                topic=self.topic_name,
+                key={"timestamp": self.time_millis()},
+                value={
+                    "station_id": self.station_id,
+                    "train_id": train.train_id,
+                    "direction": direction,
+                    "line": self.color.name,
+                    "train_status": train.status.name,
+                    "prev_station_id": prev_station_id,
+                    "prev_direction": prev_direction
+                },
+            )
+        except Exception as error:
+            logger.fatal(error)
+            raise error
 
 
     def __str__(self):

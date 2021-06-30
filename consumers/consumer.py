@@ -11,7 +11,7 @@ from tornado import gen
 logger = logging.getLogger(__name__)
 
 SCHEMA_REGISTRY_URL = "http://localhost:8081"
-BROKER_URL = "PLAINTEXT://localhost:9092, PLAINTEXT://localhost:9093, PLAINTEXT://localhost:9094"
+BROKER_URL = "PLAINTEXT://localhost:9092"
 
 class KafkaConsumer:
     """Defines the base kafka consumer class"""
@@ -33,9 +33,8 @@ class KafkaConsumer:
         self.offset_earliest = offset_earliest
 
         self.broker_properties = {
-            "bootstrap.servers" : BROKER_URL, 
-            "group.id": f"{self.topic_name_pattern}",
-            "auto.offset.reset": "earliest" if offset_earliest else "latest"
+            "bootstrap.servers": BROKER_URL, 
+            "group.id": topic_name_pattern
         }
 
         if is_avro is True:
@@ -44,14 +43,14 @@ class KafkaConsumer:
         else:
             self.consumer = Consumer(self.broker_properties)
 
-        self.consumer.subscribe([topic_name_pattern], on_assign=self.on_assign)
+        self.consumer.subscribe([self.topic_name_pattern], on_assign=self.on_assign)
 
 
     def on_assign(self, consumer, partitions):
         """Callback for when topic assignment takes place"""
         # If the topic is configured to use `offset_earliest` set the partition offset to
         # the beginning or earliest
-        if consumer.offset_earliest:
+        if self.offset_earliest:
             for partition in partitions:
                 partition.offset = OFFSET_BEGINNING
 
@@ -71,13 +70,10 @@ class KafkaConsumer:
         try:
             message = self.consumer.poll(self.consume_timeout)
             if message is None:
-                logger.warn("No message received by consumer")
                 return 0
             elif message.error() is not None:
-                logger.error(f"Error from consumer {message.error()}")
                 return 0
             else:
-                logger.debug(f"Message Received: {message}")
                 self.message_handler(message)
                 return 1
         except SerializerError as error:

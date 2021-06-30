@@ -38,8 +38,8 @@ def configure_connector():
                "table.whitelist": "stations",
                "mode": "incrementing",
                "incrementing.column.name": "stop_id",
-               "topic.prefix": "com.udacity.",
-               "poll.interval.ms": "30000",
+               "topic.prefix": "org.chicago.cta.jdbc.",
+               "poll.interval.ms": "60000",
            }
        }),
     )
@@ -48,10 +48,10 @@ def configure_connector():
     try:
         resp.raise_for_status()
     except:
-        print(f"Error creating kafka connector: {json.dumps(resp.json(), indent=2)}")
+        logger.error(f"Error creating kafka connector: {json.dumps(resp.json(), indent=2)}")
         return
 
-    logging.debug("connector created successfully")
+    logger.debug("connector created successfully")
 
 
 if __name__ == "__main__":

@@ -17,9 +17,9 @@ class Weather:
         """Handles incoming weather data"""
         
         logger.debug(f"weather event: {message.value()}")
-        weather_json = json.loads(message.value())
+        weather_json = message.value()
         try:
             self.temperature = weather_json['temperature']
             self.status = weather_json['status']
         except KeyError as e:
-            logger.debug(f"Failed to unpack message {e}")
+            logger.error(f"Failed to unpack message {e}")
